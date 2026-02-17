@@ -1,22 +1,17 @@
 import streamlit as st
-from huggingface_hub import InferenceClient
+import requests
 
 st.set_page_config(page_title="Multilingual AI Chatbot", layout="centered")
 st.title("🤖 Multilingual AI Chatbot (Cloud Version)")
 
-# Load HF token safely
+# Load API key from Streamlit Secrets
 try:
-    HF_TOKEN = st.secrets["HF_API_TOKEN"]
+    API_KEY = st.secrets["OPENROUTER_API_KEY"]
 except:
-    st.error("HF_API_TOKEN not found in Streamlit Secrets.")
+    st.error("OPENROUTER_API_KEY not found in Streamlit Secrets.")
     st.stop()
 
-# Create client using new router system
-client = InferenceClient(
-    model="microsoft/DialoGPT-small",
-    token=HF_TOKEN,
-)
-
+# Chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -24,6 +19,7 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
+# Input box
 user_input = st.chat_input("Type your message...")
 
 if user_input:
@@ -35,23 +31,13 @@ if user_input:
     with st.chat_message("user"):
         st.write(user_input)
 
-    try:
-        response = client.chat_completion(
-            messages=[
-                {"role": "user", "content": user_input}
-            ],
-            max_tokens=200
-        )
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://streamlit.io",
+        "X-Title": "Multilingual AI Chatbot"
+    }
 
-        reply = response.choices[0].message.content
-
-    except Exception as e:
-        reply = f"Model error: {str(e)}"
-
-    st.session_state.messages.append({
-        "role": "assistant",
-        "content": reply
-    })
-
-    with st.chat_message("assistant"):
-        st.write(reply)
+    data = {
+        "model": "openchat/openchat-3.5",
+        "messages
