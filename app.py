@@ -13,7 +13,7 @@ except:
 
 # Create client using new router system
 client = InferenceClient(
-    model="HuggingFaceH4/zephyr-7b-beta",
+    model="microsoft/DialoGPT-small",
     token=HF_TOKEN,
 )
 
