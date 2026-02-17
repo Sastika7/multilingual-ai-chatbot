@@ -8,7 +8,7 @@ st.set_page_config(page_title="Multilingual AI Chatbot", layout="centered")
 st.title("🤖 Multilingual AI Chatbot (Cloud Version)")
 
 # -----------------------------
-# CHECK SECRET SAFELY
+# CHECK SECRET
 # -----------------------------
 if "HF_API_TOKEN" not in st.secrets:
     st.error("HF_API_TOKEN not found in Streamlit Secrets.")
@@ -16,8 +16,7 @@ if "HF_API_TOKEN" not in st.secrets:
 
 HF_API_TOKEN = st.secrets["HF_API_TOKEN"]
 
-# NEW ROUTER ENDPOINT
-API_URL = "https://router.huggingface.co/hf-inference/models/google/flan-t5-large"
+API_URL = "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2"
 
 headers = {
     "Authorization": f"Bearer {HF_API_TOKEN}",
@@ -25,7 +24,7 @@ headers = {
 }
 
 # -----------------------------
-# FUNCTION TO CALL MODEL
+# QUERY FUNCTION
 # -----------------------------
 def query_model(prompt):
     try:
@@ -44,9 +43,6 @@ def query_model(prompt):
             return result[0].get("generated_text", "No response.")
 
         return str(result)
-
-    except requests.exceptions.Timeout:
-        return "Request timed out. Please try again."
 
     except Exception as e:
         return f"Unexpected error: {str(e)}"
