@@ -1,38 +1,21 @@
 import streamlit as st
-import requests
+from huggingface_hub import InferenceClient
 
 st.set_page_config(page_title="Multilingual AI Chatbot", layout="centered")
 st.title("🤖 Multilingual AI Chatbot (Cloud Version)")
 
-if "HF_API_TOKEN" not in st.secrets:
+# Load HF token safely
+try:
+    HF_TOKEN = st.secrets["HF_API_TOKEN"]
+except:
     st.error("HF_API_TOKEN not found in Streamlit Secrets.")
     st.stop()
 
-HF_API_TOKEN = st.secrets["HF_API_TOKEN"]
-
-API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base"
-
-headers = {
-    "Authorization": f"Bearer {HF_API_TOKEN}"
-}
-
-def query_model(prompt):
-    payload = {
-        "inputs": prompt,
-        "options": {"wait_for_model": True}
-    }
-
-    response = requests.post(API_URL, headers=headers, json=payload)
-
-    if response.status_code != 200:
-        return f"Model error: {response.text}"
-
-    result = response.json()
-
-    if isinstance(result, list):
-        return result[0]["generated_text"]
-
-    return str(result)
+# Create client using new router system
+client = InferenceClient(
+    model="HuggingFaceH4/zephyr-7b-beta",
+    token=HF_TOKEN,
+)
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -52,16 +35,18 @@ if user_input:
     with st.chat_message("user"):
         st.write(user_input)
 
-    prompt = f"""
-    Answer clearly.
-    If asked to respond in Tamil, Hindi, Malayalam, or Telugu,
-    respond ONLY in that language.
+    try:
+        response = client.chat_completion(
+            messages=[
+                {"role": "user", "content": user_input}
+            ],
+            max_tokens=200
+        )
 
-    Question:
-    {user_input}
-    """
+        reply = response.choices[0].message.content
 
-    reply = query_model(prompt)
+    except Exception as e:
+        reply = f"Model error: {str(e)}"
 
     st.session_state.messages.append({
         "role": "assistant",
