@@ -16,10 +16,12 @@ if "HF_API_TOKEN" not in st.secrets:
 
 HF_API_TOKEN = st.secrets["HF_API_TOKEN"]
 
-API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-large"
+# NEW ROUTER ENDPOINT
+API_URL = "https://router.huggingface.co/hf-inference/models/google/flan-t5-large"
 
 headers = {
-    "Authorization": f"Bearer {HF_API_TOKEN}"
+    "Authorization": f"Bearer {HF_API_TOKEN}",
+    "Content-Type": "application/json"
 }
 
 # -----------------------------
@@ -28,8 +30,7 @@ headers = {
 def query_model(prompt):
     try:
         payload = {
-            "inputs": prompt,
-            "options": {"wait_for_model": True}
+            "inputs": prompt
         }
 
         response = requests.post(API_URL, headers=headers, json=payload, timeout=60)
@@ -56,13 +57,12 @@ def query_model(prompt):
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display chat history
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
 # -----------------------------
-# CHAT INPUT (ALWAYS VISIBLE)
+# CHAT INPUT
 # -----------------------------
 user_input = st.chat_input("Type your message...")
 
