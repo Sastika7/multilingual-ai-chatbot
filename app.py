@@ -40,7 +40,7 @@ if user_input:
     }
 
     data = {
-        "model": "openchat/openchat-3.5",
+        "model": "mistralai/mistral-7b-instruct",
         "messages": st.session_state.messages
     }
 
