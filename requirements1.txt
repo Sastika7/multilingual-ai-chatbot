@@ -1,6 +1,0 @@
-flask
-streamlit
-requests
-numpy
-scikit-learn
-openai
